@@ -1,8 +1,19 @@
 import "./style.css";
 
-const VALID_NUMBER_OF_DIGITS = 3;
-const BASE_DIGIT = 10;
+interface CalculatorInterface {
+  targetValue: string | number
+  operator?: Operator | string
+  render(inputValue: string | number): void
+  reset(): void
+  tempCalculate(operator: Operator | string): void
+  initEvent(): void
+}
+
+const VALID_NUMBER_OF_DIGITS = 3
+const BASE_DIGIT = 10
 const INIT_VALUE = 0
+
+type Operator = "+" | "-" | "×" | "÷" | "="
 
 const validateNumberLength = (value: string | number) => {
   return String(value).length < VALID_NUMBER_OF_DIGITS
@@ -10,8 +21,14 @@ const validateNumberLength = (value: string | number) => {
 
 const isZero = (value: string) => Number(value) === 0
 
-const Calculator = {
-  value: 0,
+const plus = (num1: number, num2: number) => num1 + num2
+const minus = (num1: number, num2: number) => num1 - num2
+const multiply = (num1: number, num2: number) => num1 * num2
+const divide = (num1: number, num2: number) => num1 / num2
+
+const Calculator: CalculatorInterface = {
+  targetValue: 0,
+  operator: undefined,
   render(inputValue: string | number) {
     const resultEl = <HTMLDivElement>document.querySelector("#result")
     const prevValue = resultEl.innerText
@@ -22,14 +39,32 @@ const Calculator = {
     }
 
     if (resultEl) {
-      resultEl.innerText = isZero(prevValue) ? String(inputValue) : String(prevValue + inputValue)
+      this.targetValue = isZero(prevValue) ? String(inputValue) : String(prevValue + inputValue)
+      resultEl.innerText = this.targetValue
     }
   },
   reset() {
-    this.value = 0
+    this.targetValue = 0
   },
-  operator(inputNumber: number) {
-    this.render(inputNumber)
+  tempCalculate(operator: Operator | string) {
+    const isCalculate = operator === "="
+
+    if (isCalculate) {
+    }
+    this.operator = operator
+
+    if (operator === "+") {
+      plus()
+    }
+    if (operator === "-") {
+      minus()
+    }
+    if (operator === "×") {
+      multiply()
+    }
+    if (operator === "÷") {
+      divide()
+    }
   },
   initEvent() {
     const buttonContainerEl = document.querySelector(".contents")
@@ -39,7 +74,13 @@ const Calculator = {
 
       if (buttonText === "AC") {
         this.reset()
-      } else {
+      }
+
+      if (["+", "-", "×", "÷", "="].includes(buttonText)) {
+        this.tempCalculate(buttonText)
+      }
+
+      if (!Number.isNaN(buttonText)) {
         this.render(Number(buttonText))
       }
     })
