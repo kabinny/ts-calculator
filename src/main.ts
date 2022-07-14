@@ -20,12 +20,12 @@ const Calculator = {
     }
   },
   reset() {
-    this.value = 0,
+    this.value = 0
   },
   initEvent() {
     const buttonContainerEl = document.querySelector(".contents")
 
-    buttonContainerEl?.addEventListener("click", function ({ target }) {
+    buttonContainerEl?.addEventListener("click", ({ target }) => {
       const buttonText = (target as HTMLButtonElement).innerText
 
       if (buttonText === "AC") {
