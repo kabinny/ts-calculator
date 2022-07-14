@@ -9,3 +9,9 @@ const resultEl = <HTMLDivElement>document.querySelector("#result")
 if (resultEl) {
   resultEl.innerText = String(99999)
 }
+
+resultEl.addEventListener("click", function ({ target }: MouseEvent) {
+  if (target) {
+    alert((target as HTMLDivElement).innerText)
+  }
+})
