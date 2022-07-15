@@ -1,8 +1,8 @@
 import "./style.css";
 
 interface CalculatorInterface {
-  targetValue: string | number
-  operator?: Operator | string
+  tempValue: string | number
+  tempOperator?: Operator | string
   render(inputValue: string | number): void
   reset(): void
   tempCalculate(operator: Operator | string): void
@@ -10,7 +10,6 @@ interface CalculatorInterface {
 }
 
 const VALID_NUMBER_OF_DIGITS = 3
-const BASE_DIGIT = 10
 const INIT_VALUE = 0
 
 type Operator = "+" | "-" | "×" | "÷" | "="
@@ -26,9 +25,15 @@ const minus = (num1: number, num2: number) => num1 - num2
 const multiply = (num1: number, num2: number) => num1 * num2
 const divide = (num1: number, num2: number) => num1 / num2
 
+type ComputedValue = {
+  [key in Exclude<Operator, "=">]: (num1: number, num2: number) => number
+}
+
+const getComputedValue: ComputedValue = { "+": plus, "-": minus, "×": multiply, "÷": divide }
+
 const Calculator: CalculatorInterface = {
-  targetValue: 0,
-  operator: undefined,
+  tempValue: 0,
+  tempOperator: undefined,
   render(inputValue: string | number) {
     const resultEl = <HTMLDivElement>document.querySelector("#result")
     const prevValue = resultEl.innerText
@@ -39,32 +44,51 @@ const Calculator: CalculatorInterface = {
     }
 
     if (resultEl) {
-      this.targetValue = isZero(prevValue) ? String(inputValue) : String(prevValue + inputValue)
-      resultEl.innerText = this.targetValue
+      resultEl.innerText = isZero(prevValue) ? String(inputValue) : String(prevValue + inputValue)
     }
   },
   reset() {
-    this.targetValue = 0
+    // this.targetValue = 0
   },
   tempCalculate(operator: Operator | string) {
-    const isCalculate = operator === "="
+    const isReadyCalculate = operator === "="
+    const isTempCalculate = ["+", "-", "×", "÷"].includes(operator)
 
-    if (isCalculate) {
-    }
-    this.operator = operator
+    if (isTempCalculate) {
+      const resultEl = <HTMLDivElement>document.querySelector("#result")
 
-    if (operator === "+") {
-      plus()
+      this.tempOperator = operator
+      this.tempValue = Number(resultEl.innerText)
+
+      resultEl.innerText = String(0)
+
+      return
     }
-    if (operator === "-") {
-      minus()
+
+    if (this.tempOperator && ["+", "-", "×", "÷"].includes(this.tempOperator) && isReadyCalculate) {
+      const resultEl = <HTMLDivElement>document.querySelector("#result")
+
+      const resultValue = getComputedValue[this.tempOperator as Exclude<Operator, "=">](
+        Number(this.tempValue),
+        Number(resultEl.innerText)
+      )
+
+      resultEl.innerText = String(resultValue)
     }
-    if (operator === "×") {
-      multiply()
-    }
-    if (operator === "÷") {
-      divide()
-    }
+    // this.operator = operator
+
+    // if (operator === "+") {
+    //   plus()
+    // }
+    // if (operator === "-") {
+    //   minus()
+    // }
+    // if (operator === "×") {
+    //   multiply()
+    // }
+    // if (operator === "÷") {
+    //   divide()
+    // }
   },
   initEvent() {
     const buttonContainerEl = document.querySelector(".contents")
@@ -78,6 +102,7 @@ const Calculator: CalculatorInterface = {
 
       if (["+", "-", "×", "÷", "="].includes(buttonText)) {
         this.tempCalculate(buttonText)
+        return
       }
 
       if (!Number.isNaN(buttonText)) {
